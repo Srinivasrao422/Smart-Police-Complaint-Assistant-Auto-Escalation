@@ -4,7 +4,6 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const path = require('path');
 
-// Routes
 const authRoutes = require('./routes/authRoutes');
 const complaintRoutes = require('./routes/complaintRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -12,72 +11,57 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const officerRoutes = require('./routes/officerRoutes');
-
-// Middleware
 const errorHandler = require('./middleware/errorHandler');
-const rateLimiter = require('./middleware/rateLimiter');
 
 const app = express();
 
 
-// ============================================
-// 🔐 SECURITY (HELMET)
-// ============================================
+// 🔥 HELMET (important for security)
 app.use(helmet({
-  crossOriginResourcePolicy: false, // allow images/uploads
+  crossOriginResourcePolicy: false, // allow images/files
 }));
 
 
-// ============================================
-// 🌐 CORS CONFIG (IMPORTANT)
-// ============================================
+// 🔥 CORS FIX (IMPORTANT PART)
 const allowedOrigins = [
-  "http://localhost:5173", // local frontend
-  "https://smart-police-complaint-assistant-au.vercel.app" // 🔥 replace with your real Vercel URL
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://smart-police-complaint-assistant-auto-escalation-detjh9onp.vercel.app"
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // allow Postman / mobile apps
+    // allow requests with no origin (mobile apps, postman)
+    if (!origin) return callback(null, true);
 
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log("❌ Blocked by CORS:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
 }));
 
-
-// ============================================
-// 📦 BODY PARSER
-// ============================================
-app.use(express.json({ limit: '100kb' }));
+// 🔥 Handle preflight requests
+app.options('*', cors());
 
 
-// ============================================
-// 📊 LOGGER
-// ============================================
+// 🔥 BODY PARSER
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+
+// 🔥 LOGGER
 app.use(morgan('dev'));
 
 
-// ============================================
-// 🚦 RATE LIMITER
-// ============================================
-app.use(rateLimiter);
-
-
-// ============================================
-// 📂 STATIC FILES (UPLOADS)
-// ============================================
+// 🔥 STATIC FILES (for uploads/images)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
-// ============================================
-// 🔗 API ROUTES
-// ============================================
+// 🔥 ROUTES
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/users', userRoutes);
@@ -87,9 +71,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/officer', officerRoutes);
 
 
-// ============================================
-// ❌ 404 HANDLER
-// ============================================
+// 🔥 404 HANDLER
 app.use((req, res, next) => {
   const err = new Error(`Route not found: ${req.originalUrl}`);
   err.status = 404;
@@ -97,13 +79,8 @@ app.use((req, res, next) => {
 });
 
 
-// ============================================
-// ⚠️ GLOBAL ERROR HANDLER
-// ============================================
+// 🔥 ERROR HANDLER
 app.use(errorHandler);
 
 
-// ============================================
-// 📤 EXPORT APP
-// ============================================
 module.exports = app;
