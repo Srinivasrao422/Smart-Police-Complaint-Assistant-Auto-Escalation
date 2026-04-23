@@ -1,7 +1,8 @@
 import axios from "axios";
 import { getStoredToken, logoutUser } from "@/lib/session";
 
-const BASE = "http://localhost:5000";
+const BASE = import.meta.env.VITE_API_URL as string; // ✅ FIXED
+
 let isHandlingUnauthorized = false;
 
 export const apiClient = axios.create({
@@ -33,7 +34,7 @@ apiClient.interceptors.response.use(
       }, 0);
     }
     return Promise.reject(error);
-  },
+  }
 );
 
 const unwrap = async <T>(promise: Promise<{ data: T }>) => {
