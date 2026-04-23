@@ -25,27 +25,24 @@ app.use(helmet({
 // 🔥 CORS FIX (IMPORTANT PART)
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://localhost:3000",
   "https://smart-police-complaint-assistant-auto-escalation-detjh9onp.vercel.app"
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // allow requests with no origin (mobile apps, postman)
     if (!origin) return callback(null, true);
 
     if (allowedOrigins.includes(origin)) {
-      callback(null, true);
+      return callback(null, true);
     } else {
-      console.log("❌ Blocked by CORS:", origin);
-      callback(new Error("Not allowed by CORS"));
+      return callback(new Error("CORS blocked: " + origin));
     }
   },
   credentials: true,
 }));
 
-// 🔥 Handle preflight requests
-app.options('*', cors());
+// IMPORTANT
+app.options("*", cors());
 
 
 // 🔥 BODY PARSER
