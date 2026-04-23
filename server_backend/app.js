@@ -33,7 +33,7 @@ app.use(helmet({
 // ============================================
 const allowedOrigins = [
   "http://localhost:5173", // local frontend
-  "https://your-vercel-app.vercel.app" // 🔥 replace with your real Vercel URL
+  "https://smart-police-complaint-assistant-au.vercel.app" // 🔥 replace with your real Vercel URL
 ];
 
 app.use(cors({
